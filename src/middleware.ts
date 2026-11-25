@@ -34,7 +34,13 @@ export async function middleware(request: NextRequest) {
 
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser();
+
+    // An upstream outage is not a reason to send a signed-in user back to login.
+    if (protectedRoute && authError && (authError.name === "AuthRetryableFetchError" || (authError.status ?? 0) >= 500)) {
+      throw authError;
+    }
 
     // Protected routes
     if (protectedRoute && !user) {
@@ -43,6 +49,7 @@ export async function middleware(request: NextRequest) {
       url.searchParams.set("redirect", pathname);
       const redirect = NextResponse.redirect(url);
       supabaseResponse.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+      redirect.headers.set("Cache-Control", "private, no-store");
       return redirect;
     }
 
@@ -52,6 +59,7 @@ export async function middleware(request: NextRequest) {
       url.pathname = "/dashboard";
       const redirect = NextResponse.redirect(url);
       supabaseResponse.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+      redirect.headers.set("Cache-Control", "private, no-store");
       return redirect;
     }
   } catch {
@@ -63,6 +71,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  supabaseResponse.headers.set("Cache-Control", "private, no-store");
   return supabaseResponse;
 }
 
