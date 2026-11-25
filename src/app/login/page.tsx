@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Activity, Lock, Mail, ArrowRight, Loader2 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, getAuthErrorMessage, isSupabaseConfigured } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -21,6 +21,11 @@ export default function LoginPage() {
       return;
     }
 
+    if (!isSupabaseConfigured()) {
+      toast.error("Login indisponível: o serviço de autenticação ainda não está configurado neste site.");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -29,22 +34,14 @@ export default function LoginPage() {
       });
 
       if (error) {
-        // Fallback for development/testing if Supabase keys are default
-        if (error.message.includes("fetch failed") || error.message.includes("Invalid API key")) {
-          toast.info("Acessando em modo de demonstração local...");
-          router.push("/dashboard");
-          return;
-        }
-        toast.error(error.message || "Credenciais inválidas. Verifique seu e-mail e senha.");
+        toast.error(getAuthErrorMessage(error, "login"));
         return;
       }
 
       toast.success("Acesso autenticado com sucesso!");
       router.push("/dashboard");
-    } catch {
-      // In local dev without supabase running, grant access
-      toast.info("Acessando em modo de demonstração local...");
-      router.push("/dashboard");
+    } catch (error) {
+      toast.error(getAuthErrorMessage(error, "login"));
     } finally {
       setIsLoading(false);
     }
