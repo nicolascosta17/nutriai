@@ -65,6 +65,7 @@ export default function MealCard({ entry, onDelete }: MealCardProps) {
                 src={entry.photo_url}
                 alt={entry.food_name || "Refeição"}
                 fill
+                unoptimized
                 className="object-cover"
               />
             ) : (
