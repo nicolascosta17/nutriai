@@ -299,7 +299,7 @@ export default function ExercisePage() {
         <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 mb-3">
           Cronograma Semanal
         </label>
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
           {DAYS.map((day) => {
             const isSelected = selectedDay === day.key;
             const count = plan?.schedule?.[day.key]?.length || 0;
