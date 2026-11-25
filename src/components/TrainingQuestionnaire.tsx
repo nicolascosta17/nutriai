@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { parseTrainingAnswers, trainingDays, trainingQuestions, type TrainingAnswers } from "@/lib/training-assessment";
+import { parseTrainingAnswers, trainingDays, visibleTrainingQuestions, type TrainingAnswers } from "@/lib/training-assessment";
 
 export default function TrainingQuestionnaire({
   initial, onSave, onCancel,
@@ -16,8 +16,9 @@ export default function TrainingQuestionnaire({
   const [choices, setChoices] = useState<Partial<Omit<TrainingAnswers, "days">>>(initial ?? {});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const question = trainingQuestions[step - 1];
-  const total = trainingQuestions.length + 1;
+  const questions = visibleTrainingQuestions(choices.squat);
+  const question = questions[step - 1];
+  const total = questions.length + 1;
 
   async function next(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -26,7 +27,10 @@ export default function TrainingQuestionnaire({
       return;
     }
     const answers = parseTrainingAnswers({ ...choices, days });
-    if (!answers) return;
+    if (!answers || !answers.squat) {
+      setError("Responda às perguntas antes de salvar.");
+      return;
+    }
     setBusy(true);
     setError("");
     try {
@@ -51,7 +55,11 @@ export default function TrainingQuestionnaire({
           <label key={value} className="flex min-h-11 items-center gap-3 rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-800">
             <input className="h-4 w-4 shrink-0 accent-emerald-700" type="radio" name={question.key} value={value}
               checked={choices[question.key] === value}
-              onChange={() => setChoices((previous) => ({ ...previous, [question.key]: value }))} />
+              onChange={() => setChoices((previous) => ({
+                ...previous,
+                [question.key]: value,
+                ...(question.key === "squat" && previous.squat !== value ? { legs: undefined } : {}),
+              }))} />
             {label}
           </label>
         )) : (
