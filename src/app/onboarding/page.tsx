@@ -75,9 +75,8 @@ export default function OnboardingPage() {
         throw new Error(result?.error || "Não foi possível salvar o perfil.");
       }
 
-      // Also trigger initial diet and workout generation in background
+      // Generate the initial diet in the background. The workout has its own questionnaire.
       fetch("/api/generate-diet", { method: "POST" }).catch(() => null);
-      fetch("/api/generate-workout", { method: "POST" }).catch(() => null);
 
       toast.success("Protocolo metabólico inicializado com sucesso!");
       router.push("/dashboard");

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { parseTrainingAnswers } from "@/lib/training-assessment";
 import { expandSavedStrengthBlocks } from "@/lib/exercise-checklist";
 import { generateExercisePlan } from "@/lib/gemini";
 import type { Profile } from "@/types";
@@ -36,14 +37,19 @@ export async function POST() {
       );
     }
 
-    // Generate exercise plan with Gemini based on available equipment & goal
-    const exercisePlan = await generateExercisePlan(profile as Profile);
+    const answers = parseTrainingAnswers(profile.training_assessment);
+    const revision = profile.training_assessment?.revision;
+    if (!answers || typeof revision !== "string") {
+      return NextResponse.json({ error: "Responda ao questionário antes de montar o treino." }, { status: 409 });
+    }
+    const exercisePlan = await generateExercisePlan(profile as Profile, answers);
 
     // Insert new plan
     const { data: savedPlan, error: insertError } = await supabase
       .from("exercise_plans")
       .insert({
         user_id: user.id,
+        assessment_revision: revision,
         plan_name: exercisePlan.plan_name,
         goal: profile.goal || "lose_weight",
         difficulty: exercisePlan.difficulty || "intermediate",
@@ -95,11 +101,14 @@ export async function GET() {
       .select("*").eq("user_id", user.id).eq("is_active", true)
       .order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (error) throw error;
-    if (!plan) return NextResponse.json({ plan: null });
     const { data: preferences, error: preferenceError } = await supabase.from("profiles")
-      .select("available_equipment, excluded_exercises").eq("id", user.id).maybeSingle();
+      .select("available_equipment, excluded_exercises, training_assessment").eq("id", user.id).maybeSingle();
     if (preferenceError) throw preferenceError;
-    return NextResponse.json({ plan: {
+    const answers = parseTrainingAnswers(preferences?.training_assessment);
+    if (!answers || !plan || plan.assessment_revision !== preferences?.training_assessment?.revision) {
+      return NextResponse.json({ plan: null, assessment: answers });
+    }
+    return NextResponse.json({ assessment: answers, plan: {
       ...plan,
       schedule: expandSavedStrengthBlocks(plan.schedule, preferences ?? { available_equipment: [], excluded_exercises: [] }),
     } });
