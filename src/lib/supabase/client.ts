@@ -52,6 +52,7 @@ export function getAuthErrorMessage(
     normalized.includes("failed to fetch") ||
     normalized.includes("fetch failed") ||
     normalized.includes("networkerror") ||
+    normalized.includes("load failed") ||
     normalized.includes("network request failed")
   ) {
     return "Não foi possível conectar ao serviço de autenticação. Verifique sua internet e tente novamente.";
@@ -64,11 +65,11 @@ export function getAuthErrorMessage(
     return "Já existe uma conta com este e-mail. Faça login ou recupere sua senha.";
   }
 
-  if (normalized.includes("invalid login credentials")) {
+  if (code === "invalid_credentials" || normalized.includes("invalid login credentials")) {
     return "E-mail ou senha incorretos. Confira os dados e tente novamente.";
   }
 
-  if (normalized.includes("email not confirmed")) {
+  if (code === "email_not_confirmed" || normalized.includes("email not confirmed")) {
     return "Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.";
   }
 

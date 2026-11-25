@@ -93,8 +93,21 @@ export async function GET(request: NextRequest) {
       { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 }
     );
 
+    const paths = (entries ?? []).flatMap((entry) =>
+      typeof entry.photo_url === "string" && entry.photo_url.startsWith(user.id + "/") ? [entry.photo_url] : []
+    );
+    const { data: signed } = paths.length
+      ? await supabase.storage.from("food-photos").createSignedUrls(paths, 3600)
+      : { data: [] };
+    const photos = new Map((signed ?? []).flatMap(({ path, signedUrl }) =>
+      path && signedUrl ? [[path, signedUrl] as const] : []
+    ));
+
     return NextResponse.json({
-      entries: entries ?? [],
+      entries: (entries ?? []).map((entry) => ({
+        ...entry,
+        photo_url: photos.get(entry.photo_url) ?? (typeof entry.photo_url === "string" && entry.photo_url.startsWith("https://") ? entry.photo_url : null),
+      })),
       totals: {
         calories: Math.round(totals.calories),
         protein_g: Math.round(totals.protein_g * 10) / 10,
@@ -106,7 +119,7 @@ export async function GET(request: NextRequest) {
         end: endISO,
         range,
       },
-    });
+    }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     console.error("Erro interno ao buscar entradas de alimentos:", error);
     return NextResponse.json(
@@ -129,8 +142,11 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Entre na sua conta para remover a refeição." }, { status: 401 });
     }
 
-    const { error } = await supabase.from("food_entries").delete().eq("id", id).eq("user_id", user.id);
+    const { data: entry, error } = await supabase.from("food_entries").delete().eq("id", id).eq("user_id", user.id).select("photo_url").maybeSingle();
     if (error) throw error;
+    if (typeof entry?.photo_url === "string" && entry.photo_url.startsWith(user.id + "/")) {
+      await supabase.storage.from("food-photos").remove([entry.photo_url]);
+    }
     return new NextResponse(null, { status: 204 });
   } catch {
     return NextResponse.json({ error: "Não foi possível remover a refeição." }, { status: 500 });

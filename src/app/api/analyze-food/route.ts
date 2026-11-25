@@ -44,32 +44,13 @@ export async function POST(request: NextRequest) {
     // Analyze food with Gemini
     const analysis = await analyzeFood(base64, mimeType);
 
-    // Upload to Supabase Storage (if storage bucket configured)
-    let photoUrl: string | null = null;
-    try {
-      const timestamp = Date.now();
-      const sanitizedFilename = (image.name || "meal.jpg").replace(/[^a-zA-Z0-9._-]/g, "_");
-      const storagePath = `${user.id}/${timestamp}-${sanitizedFilename}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("food-photos")
-        .upload(storagePath, buffer, {
-          contentType: mimeType,
-          upsert: false,
-        });
-
-      if (!uploadError) {
-        const { data } = supabase.storage.from("food-photos").getPublicUrl(storagePath);
-        photoUrl = data.publicUrl;
-      }
-    } catch (storageErr) {
-      console.warn("Storage upload bypassed:", storageErr);
-    }
-
-    // If no public storage url, store a lightweight thumbnail or placeholder
-    if (!photoUrl) {
-      photoUrl = `data:${mimeType};base64,${base64.slice(0, 500)}...`;
-    }
+    const bucket = supabase.storage.from("food-photos");
+    const storagePath = `${user.id}/${crypto.randomUUID()}`;
+    const { error: uploadError } = await bucket.upload(storagePath, buffer, {
+      contentType: mimeType,
+      upsert: false,
+    });
+    if (uploadError) console.warn("Não foi possível armazenar a foto da refeição.", uploadError.name);
 
     // Insert food entry into database
     const { data: entry, error: insertError } = await supabase
@@ -86,13 +67,14 @@ export async function POST(request: NextRequest) {
         fiber_g: analysis.fiber_g,
         sugar_g: analysis.sugar_g,
         sodium_mg: analysis.sodium_mg,
-        photo_url: photoUrl,
+        photo_url: uploadError ? null : storagePath,
         ai_analysis: analysis.ai_analysis,
       })
       .select()
       .single();
 
     if (insertError) {
+      if (!uploadError) await bucket.remove([storagePath]);
       console.error("Erro ao salvar entrada de alimento:", insertError);
       // Return analysis even if DB insert had issues
       return NextResponse.json({

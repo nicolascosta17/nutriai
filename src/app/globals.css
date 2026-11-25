@@ -122,3 +122,358 @@ body {
 html body [data-sonner-toaster][data-y-position="top"] {
   top: calc(var(--offset-top, 16px) + var(--app-top-inset));
 }
+
+/* Shared contrast and theme colors for the app's existing surfaces. */
+:root {
+  color-scheme: light;
+  --panel-line: #a1a1aa;
+  --field-line: #71717a;
+  --chart-grid: #a1a1aa;
+  --chart-label: #52525b;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --panel-line: #5a6664;
+  --field-line: #7d8b87;
+  --chart-grid: #46534f;
+  --chart-label: #b9c8c3;
+  --surface: #172521;
+  --surface-muted: #101c19;
+  --surface-raised: #243631;
+  --ink: #f0f7f4;
+  --ink-secondary: #c5d4ce;
+}
+
+:is(
+  [class~="border-zinc-100"],
+  [class~="border-zinc-200"],
+  [class~="border-zinc-200/60"],
+  [class~="border-zinc-200/80"],
+  [class~="border-zinc-200/90"],
+  [class~="border-zinc-300/80"],
+  [class~="border-slate-100"],
+  [class~="border-slate-200"],
+  [class~="border-slate-200/60"],
+  [class~="border-slate-200/80"],
+  [class~="border-slate-200/90"],
+  [class~="border-slate-300/80"]
+) {
+  border-color: var(--panel-line);
+}
+
+:is(
+  [class~="border-zinc-300"],
+  [class~="border-zinc-400"],
+  [class~="border-slate-300"],
+  [class~="border-slate-400"]
+) {
+  border-color: var(--field-line);
+}
+
+[data-theme="dark"] :is(
+  [class~="bg-white"],
+  [class~="bg-white/90"],
+  [class~="bg-white/95"],
+  [class~="bg-white/70"]
+) {
+  background-color: var(--surface);
+}
+
+[data-theme="dark"] :is(
+  [class~="bg-zinc-50"],
+  [class~="bg-zinc-50/50"],
+  [class~="bg-zinc-50/60"],
+  [class~="bg-zinc-50/70"],
+  [class~="bg-zinc-50/80"],
+  [class~="bg-zinc-100"],
+  [class~="bg-zinc-100/80"],
+  [class~="bg-slate-50"],
+  [class~="bg-slate-50/50"],
+  [class~="bg-slate-50/60"],
+  [class~="bg-slate-50/70"],
+  [class~="bg-slate-50/80"],
+  [class~="bg-slate-100"],
+  [class~="bg-slate-100/80"]
+) {
+  background-color: var(--surface-muted);
+}
+
+[data-theme="dark"] :is(
+  [class~="bg-zinc-200"],
+  [class~="bg-zinc-300"],
+  [class~="bg-slate-200"],
+  [class~="bg-slate-300"]
+) {
+  background-color: var(--surface-raised);
+}
+
+[data-theme="dark"] :is(
+  [class~="text-zinc-700"],
+  [class~="text-zinc-800"],
+  [class~="text-zinc-900"],
+  [class~="text-zinc-950"],
+  [class~="text-slate-700"],
+  [class~="text-slate-800"],
+  [class~="text-slate-900"],
+  [class~="text-slate-950"]
+) {
+  color: var(--ink);
+}
+
+[data-theme="dark"] :is(
+  [class~="text-zinc-400"],
+  [class~="text-zinc-500"],
+  [class~="text-zinc-600"],
+  [class~="text-slate-400"],
+  [class~="text-slate-500"],
+  [class~="text-slate-600"]
+) {
+  color: var(--ink-secondary);
+}
+
+[data-theme="dark"] :is(
+  [class~="hover:bg-zinc-50"],
+  [class~="hover:bg-zinc-100"],
+  [class~="hover:bg-zinc-100/80"],
+  [class~="hover:bg-zinc-200"],
+  [class~="hover:bg-slate-50"],
+  [class~="hover:bg-slate-100"],
+  [class~="hover:bg-slate-100/80"],
+  [class~="hover:bg-slate-200"]
+):hover {
+  background-color: var(--surface-raised);
+}
+
+[data-theme="dark"] :is(
+  [class~="hover:text-zinc-700"],
+  [class~="hover:text-zinc-800"],
+  [class~="hover:text-zinc-900"],
+  [class~="hover:text-zinc-950"],
+  [class~="hover:text-slate-700"],
+  [class~="hover:text-slate-800"],
+  [class~="hover:text-slate-900"],
+  [class~="hover:text-slate-950"]
+):hover {
+  color: var(--ink);
+}
+
+[data-theme="dark"] :is(
+  [class~="bg-emerald-50"],
+  [class~="bg-emerald-100"],
+  [class~="bg-emerald-50/50"],
+  [class~="bg-emerald-50/60"]
+) {
+  background-color: #15392c;
+}
+
+[data-theme="dark"] :is(
+  [class~="text-emerald-600"],
+  [class~="text-emerald-700"],
+  [class~="text-emerald-800"],
+  [class~="text-emerald-900"]
+) {
+  color: #a6f4d1;
+}
+
+[data-theme="dark"] :is(
+  [class~="hover:bg-emerald-50"],
+  [class~="hover:bg-emerald-100"]
+):hover {
+  background-color: #15392c;
+}
+
+[data-theme="dark"] :is(
+  [class~="hover:text-emerald-700"],
+  [class~="hover:text-emerald-800"],
+  [class~="hover:text-emerald-900"]
+):hover {
+  color: #a6f4d1;
+}
+
+[data-theme="dark"] :is(
+  [class~="bg-red-50"],
+  [class~="bg-red-100"],
+  [class~="bg-red-50/50"],
+  [class~="bg-red-50/60"]
+) {
+  background-color: #45282b;
+}
+
+[data-theme="dark"] :is(
+  [class~="text-red-600"],
+  [class~="text-red-700"],
+  [class~="text-red-800"],
+  [class~="text-red-900"]
+) {
+  color: #ffc6cd;
+}
+
+[data-theme="dark"] :is(
+  [class~="hover:bg-red-50"],
+  [class~="hover:bg-red-100"]
+):hover {
+  background-color: #45282b;
+}
+
+[data-theme="dark"] :is(
+  [class~="hover:text-red-700"],
+  [class~="hover:text-red-800"],
+  [class~="hover:text-red-900"]
+):hover {
+  color: #ffc6cd;
+}
+
+[data-theme="dark"] :is(
+  [class~="bg-amber-50"],
+  [class~="bg-amber-100"],
+  [class~="bg-amber-50/50"],
+  [class~="bg-amber-50/60"]
+) {
+  background-color: #44351c;
+}
+
+[data-theme="dark"] :is(
+  [class~="text-amber-600"],
+  [class~="text-amber-700"],
+  [class~="text-amber-800"],
+  [class~="text-amber-900"]
+) {
+  color: #ffe0a0;
+}
+
+[data-theme="dark"] :is(
+  [class~="hover:bg-amber-50"],
+  [class~="hover:bg-amber-100"]
+):hover {
+  background-color: #44351c;
+}
+
+[data-theme="dark"] :is(
+  [class~="hover:text-amber-700"],
+  [class~="hover:text-amber-800"],
+  [class~="hover:text-amber-900"]
+):hover {
+  color: #ffe0a0;
+}
+
+[data-theme="dark"] :is(
+  [class~="bg-blue-50"],
+  [class~="bg-blue-100"],
+  [class~="bg-blue-50/50"],
+  [class~="bg-blue-50/60"]
+) {
+  background-color: #203755;
+}
+
+[data-theme="dark"] :is(
+  [class~="text-blue-600"],
+  [class~="text-blue-700"],
+  [class~="text-blue-800"],
+  [class~="text-blue-900"]
+) {
+  color: #c2daff;
+}
+
+[data-theme="dark"] :is(
+  [class~="hover:bg-blue-50"],
+  [class~="hover:bg-blue-100"]
+):hover {
+  background-color: #203755;
+}
+
+[data-theme="dark"] :is(
+  [class~="hover:text-blue-700"],
+  [class~="hover:text-blue-800"],
+  [class~="hover:text-blue-900"]
+):hover {
+  color: #c2daff;
+}
+
+[data-theme="dark"] :is(
+  [class~="bg-teal-50"],
+  [class~="bg-teal-100"],
+  [class~="bg-teal-50/50"],
+  [class~="bg-teal-50/60"]
+) {
+  background-color: #163c3b;
+}
+
+[data-theme="dark"] :is(
+  [class~="text-teal-600"],
+  [class~="text-teal-700"],
+  [class~="text-teal-800"],
+  [class~="text-teal-900"]
+) {
+  color: #a2eee9;
+}
+
+[data-theme="dark"] :is(
+  [class~="hover:bg-teal-50"],
+  [class~="hover:bg-teal-100"]
+):hover {
+  background-color: #163c3b;
+}
+
+[data-theme="dark"] :is(
+  [class~="hover:text-teal-700"],
+  [class~="hover:text-teal-800"],
+  [class~="hover:text-teal-900"]
+):hover {
+  color: #a2eee9;
+}
+
+[data-theme="dark"] :is(
+  [class~="bg-violet-50"],
+  [class~="bg-violet-100"],
+  [class~="bg-violet-50/50"],
+  [class~="bg-violet-50/60"]
+) {
+  background-color: #352750;
+}
+
+[data-theme="dark"] :is(
+  [class~="text-violet-600"],
+  [class~="text-violet-700"],
+  [class~="text-violet-800"],
+  [class~="text-violet-900"]
+) {
+  color: #dacafa;
+}
+
+[data-theme="dark"] :is(
+  [class~="hover:bg-violet-50"],
+  [class~="hover:bg-violet-100"]
+):hover {
+  background-color: #352750;
+}
+
+[data-theme="dark"] :is(
+  [class~="hover:text-violet-700"],
+  [class~="hover:text-violet-800"],
+  [class~="hover:text-violet-900"]
+):hover {
+  color: #dacafa;
+}
+
+[data-theme="dark"] body {
+  background-color: var(--surface-muted);
+  color: var(--ink);
+}
+
+[data-theme="dark"] :is(input, textarea, select) {
+  background-color: var(--surface);
+  color: var(--ink);
+}
+
+[data-theme="dark"] :is(input, textarea)::placeholder {
+  color: var(--ink-secondary);
+}
+
+[data-theme="dark"] [class~="bg-emerald-500"][class~="text-zinc-950"] {
+  color: #05241a;
+}
+
+[data-theme="dark"] * {
+  scrollbar-color: #34d399 #172521;
+}
