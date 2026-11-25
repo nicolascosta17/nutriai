@@ -24,7 +24,7 @@ export default function WorkoutPreferences({ equipment, excluded }: { equipment:
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
-      setMessage("Preferências salvas. Abra Treinos e toque em Adaptar Treinos com IA para aplicar ao plano.");
+      setMessage("Preferências salvas. Abra Treinos e toque em Adaptar treino para aplicar ao plano.");
     } catch (error) {
       setFailed(true);
       setMessage(error instanceof Error && error.message ? error.message : "Não foi possível salvar. Tente de novo.");
