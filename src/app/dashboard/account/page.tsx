@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import WorkoutPreferences from "@/components/WorkoutPreferences";
 import AccountSettings from "@/components/AccountSettings";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { createClient } from "@/lib/supabase/server";
@@ -25,7 +26,7 @@ export default async function AccountPage({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("name")
+    .select("name, available_equipment, excluded_exercises")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -46,6 +47,7 @@ export default async function AccountPage({
           O link é inválido ou expirou. Solicite a alteração de e-mail novamente.
         </p>
       )}
+      {profile && <WorkoutPreferences equipment={profile.available_equipment ?? []} excluded={profile.excluded_exercises ?? []} />}
       <AccountSettings userId={user.id} name={name} email={user.email ?? ""} />
     </div>
   );

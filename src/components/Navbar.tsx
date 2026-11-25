@@ -14,6 +14,7 @@ import {
   Dumbbell, 
   User, 
   Settings,
+  MessageCircle,
   ChevronRight 
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -31,6 +32,7 @@ const navLinks: NavLink[] = [
   { href: "/dashboard/diet", label: "Plano Nutricional", icon: FileText },
   { href: "/dashboard/exercise", label: "Periodização de Treino", icon: Dumbbell },
   { href: "/dashboard/profile", label: "Metabólico & Metas", icon: User },
+  { href: "/dashboard/nutrition-chat", label: "Chat de nutrição", icon: MessageCircle },
   { href: "/dashboard/account", label: "Minha conta", icon: Settings },
 ];
 
@@ -81,7 +83,7 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden xl:flex items-center gap-1.5" aria-label="Navegação Principal">
+          <nav className="hidden 2xl:flex items-center gap-1.5" aria-label="Navegação Principal">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const active = isActive(link.href);
@@ -104,7 +106,7 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
           </nav>
 
           {/* User Profile & Actions */}
-          <div className="hidden sm:flex items-center gap-4">
+          <div className="hidden 2xl:flex items-center gap-4">
             <div className="flex items-center gap-2.5 pl-2 border-l border-zinc-200">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700">
                 {userName ? userName.slice(0, 2).toUpperCase() : "NT"}
@@ -130,7 +132,7 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
           </div>
 
           {/* Mobile hamburger button */}
-          <div className="flex xl:hidden">
+          <div className="flex 2xl:hidden">
             <button
               type="button"
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -147,7 +149,7 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
 
       {/* Mobile Drawer */}
       {mobileOpen && (
-        <div id="mobile-navigation" className="xl:hidden max-h-[calc(100dvh-4rem-var(--app-top-inset))] overflow-y-auto border-t border-zinc-200 bg-white px-4 pt-3 pb-5 space-y-2 shadow-lg">
+        <div id="mobile-navigation" className="2xl:hidden max-h-[calc(100dvh-4rem-var(--app-top-inset))] overflow-y-auto border-t border-zinc-200 bg-white px-4 pt-3 pb-5 space-y-2 shadow-lg">
           <div className="px-3 py-2 border-b border-zinc-100 mb-2">
             <p className="text-xs font-semibold text-zinc-900">{userName || "Paciente Ativo"}</p>
             <p className="text-[11px] text-zinc-500">{userEmail}</p>

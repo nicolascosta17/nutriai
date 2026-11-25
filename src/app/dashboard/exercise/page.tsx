@@ -262,12 +262,12 @@ export default function ExercisePage() {
           {isGenerating ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
-              <span>Gerando com IA...</span>
+              <span>Preparando treino…</span>
             </>
           ) : (
             <>
               <Sparkles className="w-4 h-4 text-emerald-400" />
-              <span>Adaptar Treinos com IA</span>
+              <span>Adaptar treino</span>
             </>
           )}
         </button>
