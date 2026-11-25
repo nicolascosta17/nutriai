@@ -64,7 +64,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anonima
 GEMINI_API_KEY=sua-chave-gemini-api
 ```
-> **Nota de Resiliência:** O sistema possui mocks inteligentes integrados. Caso as chaves do Supabase ou Gemini não estejam preenchidas, a aplicação roda em modo de demonstração clínica com cálculos reais da fórmula de Mifflin-St Jeor, gráficos interativos e fluxo completo.
+> **Modo de demonstração:** sem as credenciais do Supabase, o painel e os cálculos demonstrativos continuam disponíveis, mas criar contas e entrar com e-mail e senha ficam desativados. Para habilitar autenticação real, configure `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` no `.env.local` durante o desenvolvimento e nas variáveis do projeto Netlify antes da publicação.
 
 ### 3. Migração do Banco de Dados (Supabase)
 O arquivo de migração completo encontra-se em:
