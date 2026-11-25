@@ -70,15 +70,19 @@ export default function OnboardingPage() {
         }),
       });
 
+      if (!response.ok) {
+        const result = await response.json().catch(() => null);
+        throw new Error(result?.error || "Não foi possível salvar o perfil.");
+      }
+
       // Also trigger initial diet and workout generation in background
       fetch("/api/generate-diet", { method: "POST" }).catch(() => null);
       fetch("/api/generate-workout", { method: "POST" }).catch(() => null);
 
       toast.success("Protocolo metabólico inicializado com sucesso!");
       router.push("/dashboard");
-    } catch {
-      toast.info("Perfil configurado. Redirecionando para o painel...");
-      router.push("/dashboard");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível salvar o perfil.");
     } finally {
       setIsSubmitting(false);
     }
