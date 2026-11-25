@@ -61,7 +61,7 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
   };
 
   return (
-    <header className="app-safe-area-top sticky top-0 z-40 w-full border-b border-zinc-200/80 bg-white/95 backdrop-blur-md">
+    <header className="app-safe-area-top sticky z-40 w-full border-b border-zinc-200/80 bg-white/95 backdrop-blur-md">
       <div className="app-safe-area-horizontal mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-6">
           {/* Logo & Clinical Brand */}
