@@ -59,8 +59,8 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-zinc-200/80 bg-white/95 backdrop-blur-md">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <header className="app-safe-area-top sticky top-0 z-40 w-full border-b border-zinc-200/80 bg-white/95 backdrop-blur-md">
+      <div className="app-safe-area-horizontal mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-6">
           {/* Logo & Clinical Brand */}
           <Link
@@ -135,8 +135,9 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
             <button
               type="button"
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none"
+              className="min-h-11 min-w-11 rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none"
               aria-expanded={mobileOpen}
+              aria-controls="mobile-navigation"
               aria-label="Abrir menu de navegação"
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -147,7 +148,7 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
 
       {/* Mobile Drawer */}
       {mobileOpen && (
-        <div className="lg:hidden border-t border-zinc-200 bg-white px-4 pt-3 pb-5 space-y-2 shadow-lg">
+        <div id="mobile-navigation" className="lg:hidden border-t border-zinc-200 bg-white px-4 pt-3 pb-5 space-y-2 shadow-lg">
           <div className="px-3 py-2 border-b border-zinc-100 mb-2">
             <p className="text-xs font-semibold text-zinc-900">{userName || "Paciente Ativo"}</p>
             <p className="text-[11px] text-zinc-500">{userEmail}</p>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Activity, Lock, Mail, ArrowRight, Loader2 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, getAuthErrorMessage, isSupabaseConfigured } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -13,11 +13,17 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+  const authConfigured = isSupabaseConfigured();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error("Preencha seu e-mail e senha.");
+      return;
+    }
+
+    if (!authConfigured) {
+      toast.error("Login indisponível: o serviço de autenticação ainda não está configurado neste site.");
       return;
     }
 
@@ -29,22 +35,14 @@ export default function LoginPage() {
       });
 
       if (error) {
-        // Fallback for development/testing if Supabase keys are default
-        if (error.message.includes("fetch failed") || error.message.includes("Invalid API key")) {
-          toast.info("Acessando em modo de demonstração local...");
-          router.push("/dashboard");
-          return;
-        }
-        toast.error(error.message || "Credenciais inválidas. Verifique seu e-mail e senha.");
+        toast.error(getAuthErrorMessage(error, "login"));
         return;
       }
 
       toast.success("Acesso autenticado com sucesso!");
       router.push("/dashboard");
-    } catch {
-      // In local dev without supabase running, grant access
-      toast.info("Acessando em modo de demonstração local...");
-      router.push("/dashboard");
+    } catch (error) {
+      toast.error(getAuthErrorMessage(error, "login"));
     } finally {
       setIsLoading(false);
     }
@@ -72,6 +70,11 @@ export default function LoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 sm:px-10 rounded-xl border border-zinc-200/90 shadow-xs">
           <form onSubmit={handleLogin} className="space-y-4">
+            {!authConfigured && (
+              <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-left text-sm text-amber-900">
+                Login indisponível: o serviço de contas ainda não foi configurado neste site.
+              </div>
+            )}
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">
                 E-mail
@@ -118,7 +121,7 @@ export default function LoginPage() {
             <div className="pt-2">
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || !authConfigured}
                 className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-zinc-950 hover:bg-zinc-800 text-white font-semibold text-sm transition-all shadow-xs disabled:opacity-70"
               >
                 {isLoading ? (
