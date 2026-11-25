@@ -38,10 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: `try { if (localStorage.getItem("nutriai-theme") === "dark") document.documentElement.dataset.theme = "dark"; } catch {}` }} />
-      </head>
+    <html lang="pt-BR">
       <body className={`${inter.className} antialiased`}>
         <PwaRegistrar />
         {children}
