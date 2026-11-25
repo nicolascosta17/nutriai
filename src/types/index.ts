@@ -25,6 +25,7 @@ export interface Profile {
   goal: "lose_weight" | "gain_muscle" | "maintain" | "health" | null;
   target_weight_kg: number | null;
   available_equipment: string[] | null;
+  excluded_exercises?: string[] | null;
   daily_calorie_target: number | null;
   created_at: string;
   updated_at: string;
