@@ -1,17 +1,19 @@
 "use client";
 
+import NutriLogo from "@/components/NutriLogo";
 import { useState } from "react";
 import Link from "next/link";
 import AuthCallbackNotice from "@/components/AuthCallbackNotice";
 import GoogleSignIn from "@/components/GoogleSignIn";
 import { useRouter } from "next/navigation";
-import { Activity, Lock, Mail, ArrowRight, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ArrowRight, Loader2 } from "lucide-react";
 import { createClient, getAuthErrorMessage, isSupabaseConfigured } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -64,9 +66,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-zinc-50 border-t-2 border-emerald-600">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link href="/" className="inline-flex items-center gap-2 mb-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-950 text-emerald-400">
-            <Activity className="h-5 w-5" strokeWidth={2.2} />
-          </div>
+          <NutriLogo className="h-10 w-10" />
           <span className="text-xl font-bold tracking-tight text-zinc-950">
             Nutri<span className="text-emerald-600">AI</span>
           </span>
@@ -110,7 +110,7 @@ export default function LoginPage() {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-600">
+                <label htmlFor="auth-password" className="block text-xs font-semibold uppercase tracking-wider text-zinc-600">
                   Senha
                 </label>
               </div>
@@ -119,14 +119,24 @@ export default function LoginPage() {
                   <Lock className="h-4 w-4" />
                 </div>
                 <input
-                  type="password"
+                  id="auth-password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="block w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-950 focus:border-zinc-950 transition-colors"
+                  className="block w-full pl-9 pr-12 py-2.5 text-sm rounded-lg border border-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-950 focus:border-zinc-950 transition-colors"
                 />
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  aria-controls="auth-password"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  className="absolute inset-y-0 right-0 grid min-w-11 place-items-center rounded-r-lg text-zinc-500 hover:text-zinc-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-700"
+                >
+                  {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+                </button>
               </div>
             </div>
 
