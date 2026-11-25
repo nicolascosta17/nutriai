@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import AuthCallbackNotice from "@/components/AuthCallbackNotice";
+import GoogleSignIn from "@/components/GoogleSignIn";
 import { useRouter } from "next/navigation";
 import { Activity, Lock, Mail, ArrowRight, Loader2 } from "lucide-react";
 import { createClient, getAuthErrorMessage, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -30,7 +32,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
@@ -39,8 +41,18 @@ export default function LoginPage() {
         return;
       }
 
+      if (!data.user) {
+        toast.error("Não foi possível iniciar a sessão. Tente novamente.");
+        return;
+      }
+
       toast.success("Acesso autenticado com sucesso!");
-      router.push("/dashboard");
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("daily_calorie_target")
+        .eq("id", data.user.id)
+        .maybeSingle();
+      router.replace(profile?.daily_calorie_target ? "/dashboard" : "/onboarding");
     } catch (error) {
       toast.error(getAuthErrorMessage(error, "login"));
     } finally {
@@ -69,6 +81,7 @@ export default function LoginPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 sm:px-10 rounded-xl border border-zinc-200/90 shadow-xs">
+          <AuthCallbackNotice />
           <form onSubmit={handleLogin} className="space-y-4">
             {!authConfigured && (
               <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-left text-sm text-amber-900">
@@ -85,6 +98,7 @@ export default function LoginPage() {
                 </div>
                 <input
                   type="email"
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu.email@exemplo.com"
@@ -99,9 +113,6 @@ export default function LoginPage() {
                 <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-600">
                   Senha
                 </label>
-                <a href="#" className="text-xs text-emerald-700 hover:text-emerald-800 font-medium">
-                  Esqueceu a senha?
-                </a>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
@@ -109,6 +120,7 @@ export default function LoginPage() {
                 </div>
                 <input
                   type="password"
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -138,6 +150,8 @@ export default function LoginPage() {
               </button>
             </div>
           </form>
+
+          <GoogleSignIn disabled={isLoading || !authConfigured} />
 
           <div className="mt-6 pt-6 border-t border-zinc-100 text-center">
             <p className="text-xs text-zinc-500">

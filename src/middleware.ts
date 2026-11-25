@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Protected routes
-    if (pathname.startsWith("/dashboard") && !user) {
+    if ((pathname.startsWith("/dashboard") || pathname === "/onboarding") && !user) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("redirect", pathname);
@@ -60,6 +60,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/onboarding",
     "/login",
     "/register",
   ],
