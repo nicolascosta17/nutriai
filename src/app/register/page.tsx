@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import GoogleSignIn from "@/components/GoogleSignIn";
 import { useRouter } from "next/navigation";
-import { Activity, Lock, Mail, User, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import { Activity, Lock, Mail, User, ArrowRight, Loader2 } from "lucide-react";
 import { createClient, getAuthErrorMessage, isSupabaseConfigured } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
@@ -18,13 +19,13 @@ export default function RegisterPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !password) {
+    if (!name.trim() || !email.trim() || !password) {
       toast.error("Preencha todos os campos do cadastro.");
       return;
     }
 
-    if (password.length < 6) {
-      toast.error("A senha deve ter no mínimo 6 caracteres.");
+    if (password.length < 8) {
+      toast.error("A senha deve ter no mínimo 8 caracteres.");
       return;
     }
 
@@ -36,10 +37,11 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
-          data: { name },
+          data: { name: name.trim() },
+          emailRedirectTo: new URL("/auth/callback", window.location.origin).href,
         },
       });
 
@@ -49,7 +51,7 @@ export default function RegisterPage() {
       }
 
       if (!data.session) {
-        toast.success("Conta registrada. Confirme seu e-mail para continuar; verifique sua caixa de entrada.");
+        toast.success("Se for um novo cadastro, enviaremos um link de confirmação ao seu e-mail.");
         router.push("/login");
         return;
       }
@@ -100,6 +102,8 @@ export default function RegisterPage() {
                 </div>
                 <input
                   type="text"
+                  autoComplete="name"
+                  maxLength={120}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Dr. / Paciente João Silva"
@@ -119,6 +123,7 @@ export default function RegisterPage() {
                 </div>
                 <input
                   type="email"
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="joao@exemplo.com"
@@ -138,18 +143,15 @@ export default function RegisterPage() {
                 </div>
                 <input
                   type="password"
+                  autoComplete="new-password"
+                  minLength={8}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres"
                   required
                   className="block w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-950 focus:border-zinc-950 transition-colors"
                 />
               </div>
-            </div>
-
-            <div className="flex items-center gap-2 text-[11px] text-zinc-500 pt-1">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Dados protegidos por criptografia de ponta a ponta.</span>
             </div>
 
             <div className="pt-2">
@@ -165,13 +167,15 @@ export default function RegisterPage() {
                   </>
                 ) : (
                   <>
-                    <span>Prosseguir para Anamnese</span>
+                    <span>Criar conta</span>
                     <ArrowRight className="w-4 h-4 text-emerald-400" />
                   </>
                 )}
               </button>
             </div>
           </form>
+
+          <GoogleSignIn disabled={isLoading || !authConfigured} />
 
           <div className="mt-6 pt-6 border-t border-zinc-100 text-center">
             <p className="text-xs text-zinc-500">
