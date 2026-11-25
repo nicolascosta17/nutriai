@@ -1,15 +1,17 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // In local development without configured Supabase credentials, allow pass-through
+  // Preserve the local demo when Supabase is not configured.
   if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes("your_supabase_url")) {
     return NextResponse.next();
   }
 
+  const { pathname } = request.nextUrl;
+  const protectedRoute = pathname === "/onboarding" || pathname.startsWith("/dashboard");
   let supabaseResponse = NextResponse.next({ request });
 
   try {
@@ -18,7 +20,7 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+        setAll(cookiesToSet: Array<{ name: string; value: string; options?: CookieOptions }>) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
@@ -34,24 +36,31 @@ export async function middleware(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    const { pathname } = request.nextUrl;
-
     // Protected routes
-    if ((pathname.startsWith("/dashboard") || pathname === "/onboarding") && !user) {
+    if (protectedRoute && !user) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(url);
+      const redirect = NextResponse.redirect(url);
+      supabaseResponse.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+      return redirect;
     }
 
     // Auth routes
     if ((pathname === "/login" || pathname === "/register") && user) {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
-      return NextResponse.redirect(url);
+      const redirect = NextResponse.redirect(url);
+      supabaseResponse.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+      return redirect;
     }
-  } catch (err) {
-    console.warn("Middleware auth check skipped:", err);
+  } catch {
+    if (protectedRoute) {
+      return new NextResponse("Não foi possível verificar a sessão. Tente novamente.", {
+        status: 503,
+        headers: { "Cache-Control": "no-store" },
+      });
+    }
   }
 
   return supabaseResponse;
