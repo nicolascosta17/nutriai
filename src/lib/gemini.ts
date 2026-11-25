@@ -1,5 +1,6 @@
 "use server";
 
+import type { TrainingAnswers } from "@/lib/training-assessment";
 import { buildExerciseSchedule } from "@/lib/exercise-checklist";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type {
@@ -179,13 +180,13 @@ Gere uma prescrição dietética completa em formato JSON válido:
 // 3. Generate Exercise Plan
 // ---------------------------------------------------------------------------
 
-export async function generateExercisePlan(profile: Profile): Promise<ExercisePlanResult> {
+export async function generateExercisePlan(profile: Profile, answers: TrainingAnswers): Promise<ExercisePlanResult> {
   return {
     plan_name: "Treino com suas preferências",
     goal: profile.goal ?? "health",
-    difficulty: "beginner",
+    difficulty: answers.experience === "regular" ? "intermediate" : "beginner",
     notes: "Exercícios individuais conforme os equipamentos e modalidades disponíveis.",
-    schedule: buildExerciseSchedule(profile),
+    schedule: buildExerciseSchedule(profile, answers),
     exercises: [],
   };
 }
