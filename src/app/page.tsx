@@ -1,6 +1,6 @@
+import NutriLogo from "@/components/NutriLogo";
 import Link from "next/link";
 import { 
-  Activity, 
   Camera, 
   Sparkles, 
   Dumbbell, 
@@ -21,9 +21,7 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-950 text-emerald-400">
-              <Activity className="h-5 w-5" strokeWidth={2.2} />
-            </div>
+            <NutriLogo className="h-9 w-9" />
             <div className="flex flex-col">
               <span className="text-base font-bold tracking-tight text-zinc-950">
                 Nutri<span className="text-emerald-600">AI</span>
@@ -237,7 +235,7 @@ export default function HomePage() {
       <footer className="border-t border-zinc-200 py-10 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
           <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-emerald-600" />
+            <NutriLogo className="h-6 w-6 rounded" />
             <span className="font-semibold text-zinc-900">NutriAI Platform</span>
             <span>— Avaliação Nutricional Computacional</span>
           </div>
