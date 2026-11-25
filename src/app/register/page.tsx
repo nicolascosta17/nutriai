@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Activity, Lock, Mail, User, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, getAuthErrorMessage, isSupabaseConfigured } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
 export default function RegisterPage() {
@@ -27,6 +27,11 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!isSupabaseConfigured()) {
+      toast.error("Cadastro indisponível: o serviço de autenticação ainda não está configurado neste site. Sua conta não foi criada.");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -38,21 +43,20 @@ export default function RegisterPage() {
       });
 
       if (error) {
-        if (error.message.includes("fetch failed") || error.message.includes("Invalid API key")) {
-          // Dev fallback
-          toast.success("Conta criada em modo de avaliação local!");
-          router.push("/onboarding");
-          return;
-        }
-        toast.error(error.message);
+        toast.error(getAuthErrorMessage(error, "register"));
+        return;
+      }
+
+      if (!data.session) {
+        toast.success("Conta registrada. Confirme seu e-mail para continuar; verifique sua caixa de entrada.");
+        router.push("/login");
         return;
       }
 
       toast.success("Cadastro realizado! Vamos configurar suas métricas corporais.");
       router.push("/onboarding");
-    } catch {
-      toast.success("Conta criada! Vamos iniciar o protocolo de anamnese.");
-      router.push("/onboarding");
+    } catch (error) {
+      toast.error(getAuthErrorMessage(error, "register"));
     } finally {
       setIsLoading(false);
     }
