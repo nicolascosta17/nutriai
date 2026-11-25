@@ -1,3 +1,4 @@
+import ThemeToggle from "@/components/ThemeToggle";
 import NutriLogo from "@/components/NutriLogo";
 import Link from "next/link";
 import { 
@@ -26,19 +27,20 @@ export default function HomePage() {
               <span className="text-base font-bold tracking-tight text-zinc-950">
                 Nutri<span className="text-emerald-600">AI</span>
               </span>
-              <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
+              <span className="hidden sm:block text-[10px] font-medium uppercase tracking-wider text-zinc-400">
                 Clinical Precision
               </span>
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-600">
+          <nav className="hidden lg:flex items-center gap-8 text-sm font-medium text-zinc-600">
             <a href="#solucao" className="hover:text-zinc-950 transition-colors">Visão Computacional</a>
             <a href="#metodologia" className="hover:text-zinc-950 transition-colors">Metodologia Científica</a>
             <a href="#treino" className="hover:text-zinc-950 transition-colors">Treino & Adaptação</a>
           </nav>
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+            <ThemeToggle />
             <Link
               href="/login"
               className="whitespace-nowrap px-2 py-2 text-[11px] font-semibold text-zinc-700 transition-colors hover:text-zinc-950 sm:px-3 sm:text-xs"
