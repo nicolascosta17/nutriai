@@ -80,3 +80,21 @@ export async function POST() {
     );
   }
 }
+
+export async function GET() {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Entre na sua conta para consultar o plano de treino." }, { status: 401 });
+    }
+
+    const { data: plan, error } = await supabase.from("exercise_plans")
+      .select("*").eq("user_id", user.id).eq("is_active", true)
+      .order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (error) throw error;
+    return NextResponse.json({ plan });
+  } catch {
+    return NextResponse.json({ error: "Não foi possível carregar o plano de treino." }, { status: 500 });
+  }
+}
