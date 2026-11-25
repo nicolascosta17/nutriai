@@ -80,6 +80,27 @@ body {
   animation: pulseGlow 2s ease-in-out infinite;
 }
 
+/* Prevent narrow layouts from extending beyond the viewport and stop iOS Safari's
+   automatic input zoom (which occurs when a field's text is below 16px). */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 /* Glassmorphism */
 .glass {
   @apply backdrop-blur-lg bg-white/70 border border-white/20;
