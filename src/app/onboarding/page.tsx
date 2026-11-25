@@ -1,9 +1,9 @@
 "use client";
 
+import NutriLogo from "@/components/NutriLogo";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { 
-  Activity, 
   ArrowRight, 
   ArrowLeft, 
   Check, 
@@ -90,9 +90,7 @@ export default function OnboardingPage() {
         {/* Top Header */}
         <div className="flex items-center justify-between mb-8 pb-4 border-b border-zinc-200">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-950 text-emerald-400">
-              <Activity className="h-4 w-4" />
-            </div>
+            <NutriLogo className="h-8 w-8" />
             <div>
               <span className="text-sm font-bold text-zinc-950">NutriAI Clinical</span>
               <span className="text-xs text-zinc-500 block">Protocolo de Anamnese & Prescrição</span>
