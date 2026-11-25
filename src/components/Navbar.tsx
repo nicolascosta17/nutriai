@@ -1,5 +1,6 @@
 "use client";
 
+import ThemeToggle from "@/components/ThemeToggle";
 import NutriLogo from "@/components/NutriLogo";
 import { useState } from "react";
 import Link from "next/link";
@@ -105,7 +106,8 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
           </nav>
 
           {/* User Profile & Actions */}
-          <div className="hidden sm:flex items-center gap-4">
+          <div className="hidden xl:flex items-center gap-3">
+            <ThemeToggle />
             <div className="flex items-center gap-2.5 pl-2 border-l border-zinc-200">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700">
                 {userName ? userName.slice(0, 2).toUpperCase() : "NT"}
@@ -131,7 +133,8 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
           </div>
 
           {/* Mobile hamburger button */}
-          <div className="flex xl:hidden">
+          <div className="flex items-center gap-2 xl:hidden">
+            <ThemeToggle />
             <button
               type="button"
               onClick={() => setMobileOpen(!mobileOpen)}
