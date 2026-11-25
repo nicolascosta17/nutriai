@@ -115,3 +115,24 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  const id = request.nextUrl.searchParams.get("id");
+  if (!id || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(id)) {
+    return NextResponse.json({ error: "Registro inválido." }, { status: 400 });
+  }
+
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Entre na sua conta para remover a refeição." }, { status: 401 });
+    }
+
+    const { error } = await supabase.from("food_entries").delete().eq("id", id).eq("user_id", user.id);
+    if (error) throw error;
+    return new NextResponse(null, { status: 204 });
+  } catch {
+    return NextResponse.json({ error: "Não foi possível remover a refeição." }, { status: 500 });
+  }
+}
