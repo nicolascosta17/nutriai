@@ -27,9 +27,12 @@ export default function DietPage() {
   const loadDietPlan = async () => {
     setIsLoading(true);
     try {
-      // In local dev/mock or when fetching from db
-      const res = await fetch("/api/profile");
-      if (res.ok) {
+      const res = await fetch("/api/generate-diet");
+      if (!res.ok) throw new Error("Falha ao carregar o plano alimentar.");
+      const { plan } = await res.json();
+      if (plan) {
+        setDietPlan(plan);
+      } else {
         // Mock fallback if user hasn't generated yet
         setDietPlan({
           id: "plan-1",
@@ -119,12 +122,11 @@ export default function DietPage() {
         throw new Error(err?.error || "Falha na geração do plano.");
       }
       const data = await res.json();
-      if (data.plan) {
-        setDietPlan(data.plan);
-      }
+      if (!data.plan) throw new Error("O servidor não retornou o plano alimentar.");
+      setDietPlan(data.plan);
       toast.success("Novo plano alimentar prescrito com sucesso!");
     } catch (error) {
-      toast.info("Plano nutricional atualizado de acordo com suas métricas.");
+      toast.error(error instanceof Error ? error.message : "Não foi possível gerar o plano alimentar.");
     } finally {
       setIsGenerating(false);
     }
