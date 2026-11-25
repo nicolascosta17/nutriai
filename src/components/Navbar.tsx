@@ -13,6 +13,7 @@ import {
   FileText, 
   Dumbbell, 
   User, 
+  Settings,
   ChevronRight 
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -30,6 +31,7 @@ const navLinks: NavLink[] = [
   { href: "/dashboard/diet", label: "Plano Nutricional", icon: FileText },
   { href: "/dashboard/exercise", label: "Periodização de Treino", icon: Dumbbell },
   { href: "/dashboard/profile", label: "Metabólico & Metas", icon: User },
+  { href: "/dashboard/account", label: "Minha conta", icon: Settings },
 ];
 
 interface NavbarProps {
@@ -82,7 +84,7 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1.5" aria-label="Navegação Principal">
+          <nav className="hidden xl:flex items-center gap-1.5" aria-label="Navegação Principal">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const active = isActive(link.href);
@@ -115,7 +117,7 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
                   {userName || "Paciente"}
                 </span>
                 <span className="text-[11px] text-zinc-500 leading-tight truncate max-w-[140px]">
-                  {userEmail || "paciente@nutriai.com"}
+                  {userEmail}
                 </span>
               </div>
             </div>
@@ -131,7 +133,7 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
           </div>
 
           {/* Mobile hamburger button */}
-          <div className="flex lg:hidden">
+          <div className="flex xl:hidden">
             <button
               type="button"
               onClick={() => setMobileOpen(!mobileOpen)}
