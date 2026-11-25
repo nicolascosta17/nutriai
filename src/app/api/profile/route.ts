@@ -60,7 +60,11 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    const body: unknown = await request.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Dados do perfil inválidos." }, { status: 400 });
+    }
+    const submittedFields = body as Record<string, unknown>;
 
     // Fetch current profile to merge with updates
     const { data: currentProfile } = await supabase
@@ -68,12 +72,6 @@ export async function PUT(request: NextRequest) {
       .select("*")
       .eq("id", user.id)
       .single();
-
-    const baseProfile = currentProfile || { id: user.id, email: user.email };
-    const mergedProfile = { ...baseProfile, ...body } as Profile;
-
-    // Recalculate daily calorie target based on updated profile data
-    const dailyCalorieTarget = calculateDailyCalorieTarget(mergedProfile);
 
     const allowedFields = [
       "name",
@@ -89,13 +87,13 @@ export async function PUT(request: NextRequest) {
 
     const updateData: Record<string, unknown> = {};
     for (const field of allowedFields) {
-      if (body[field] !== undefined) {
-        updateData[field] = body[field];
+      if (submittedFields[field] !== undefined) {
+        updateData[field] = submittedFields[field];
       }
     }
 
-    updateData.daily_calorie_target = dailyCalorieTarget;
-    updateData.updated_at = new Date().toISOString();
+    const mergedProfile = { ...currentProfile, ...updateData } as Profile;
+    updateData.daily_calorie_target = calculateDailyCalorieTarget(mergedProfile);
 
     const { data: updatedProfile, error: updateError } = await supabase
       .from("profiles")
