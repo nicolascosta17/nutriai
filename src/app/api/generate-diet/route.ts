@@ -42,13 +42,6 @@ export async function POST() {
     // Generate diet plan with Gemini
     const dietPlan = await generateDietPlan(profile as Profile);
 
-    // Deactivate previous diet plans
-    await supabase
-      .from("diet_plans")
-      .update({ is_active: false })
-      .eq("user_id", user.id)
-      .eq("is_active", true);
-
     // Insert new plan
     const { data: savedPlan, error: insertError } = await supabase
       .from("diet_plans")
@@ -70,6 +63,14 @@ export async function POST() {
         { status: 500 }
       );
     }
+
+    const { error: cleanupError } = await supabase
+      .from("diet_plans")
+      .update({ is_active: false })
+      .eq("user_id", user.id)
+      .eq("is_active", true)
+      .lt("created_at", savedPlan.created_at);
+    if (cleanupError) console.warn("Não foi possível desativar planos anteriores.", cleanupError.code);
 
     return NextResponse.json({
       message: "Plano nutricional estruturado com sucesso.",
