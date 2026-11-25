@@ -33,7 +33,7 @@ const navLinks: NavLink[] = [
   { href: "/dashboard/diet", label: "Plano Nutricional", icon: FileText },
   { href: "/dashboard/exercise", label: "Periodização de Treino", icon: Dumbbell },
   { href: "/dashboard/profile", label: "Metabólico & Metas", icon: User },
-  { href: "/dashboard/nutrition-chat", label: "Chat de nutrição", icon: MessageCircle },
+  { href: "/dashboard/nutrition-chat", label: "Luna", icon: MessageCircle },
   { href: "/dashboard/account", label: "Minha conta", icon: Settings },
 ];
 
