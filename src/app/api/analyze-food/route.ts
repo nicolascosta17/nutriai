@@ -21,14 +21,18 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData();
-    const image = (formData.get("image") || formData.get("photo")) as File | null;
-    const mealType = (formData.get("meal_type") as string) || "lunch";
+    const image = formData.get("image") || formData.get("photo");
+    const mealType = formData.get("meal_type") || "lunch";
 
-    if (!image) {
+    if (!image || typeof image === "string" || image.size === 0) {
       return NextResponse.json(
         { error: "Imagem é obrigatória para a análise." },
         { status: 400 }
       );
+    }
+
+    if (typeof mealType !== "string" || !["breakfast", "lunch", "dinner", "snack"].includes(mealType)) {
+      return NextResponse.json({ error: "Tipo de refeição inválido." }, { status: 400 });
     }
 
     // Convert image to base64
