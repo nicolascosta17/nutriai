@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 
 const key = "nutriai-theme";
@@ -17,6 +17,16 @@ function isDark() {
 
 export default function ThemeToggle() {
   const dark = useSyncExternalStore(subscribe, isDark, () => false);
+  useEffect(() => {
+    if (document.documentElement.dataset.theme) return;
+    try {
+      document.documentElement.dataset.theme = localStorage.getItem(key) === "dark" ? "dark" : "light";
+    } catch {
+      document.documentElement.dataset.theme = "light";
+    }
+    window.dispatchEvent(new Event(eventName));
+  }, []);
+
   const label = dark ? "Ativar tema claro" : "Ativar tema escuro";
   const Icon = dark ? Sun : Moon;
 
