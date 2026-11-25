@@ -105,3 +105,15 @@ body {
 .glass {
   @apply backdrop-blur-lg bg-white/70 border border-white/20;
 }
+
+/* Reserve the iPhone status-bar area when the app runs from the Home Screen. */
+.app-safe-area-horizontal {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+@media (display-mode: standalone) {
+  .app-safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
