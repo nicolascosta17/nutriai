@@ -135,8 +135,9 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
             <button
               type="button"
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none"
+              className="min-h-11 min-w-11 rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none"
               aria-expanded={mobileOpen}
+              aria-controls="mobile-navigation"
               aria-label="Abrir menu de navegação"
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -147,7 +148,7 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
 
       {/* Mobile Drawer */}
       {mobileOpen && (
-        <div className="lg:hidden border-t border-zinc-200 bg-white px-4 pt-3 pb-5 space-y-2 shadow-lg">
+        <div id="mobile-navigation" className="lg:hidden border-t border-zinc-200 bg-white px-4 pt-3 pb-5 space-y-2 shadow-lg">
           <div className="px-3 py-2 border-b border-zinc-100 mb-2">
             <p className="text-xs font-semibold text-zinc-900">{userName || "Paciente Ativo"}</p>
             <p className="text-[11px] text-zinc-500">{userEmail}</p>
