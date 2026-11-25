@@ -12,6 +12,19 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const protectedRoute = pathname === "/onboarding" || pathname.startsWith("/dashboard");
+  const isHome = pathname === "/";
+
+  // The installed app opens at /. Skip auth for anonymous visitors to the landing page.
+  if (isHome) {
+    const projectRef = new URL(supabaseUrl).hostname.split(".")[0];
+    const sessionCookie = `sb-${projectRef}-auth-token`;
+    const hasSession = request.cookies.getAll().some(({ name }) =>
+      name === sessionCookie || /^\d+$/.test(name.startsWith(sessionCookie + ".") ? name.slice(sessionCookie.length + 1) : "")
+    );
+    if (!hasSession) {
+      return NextResponse.next({ headers: { "Cache-Control": "private, no-store" } });
+    }
+  }
   let supabaseResponse = NextResponse.next({ request });
 
   try {
@@ -54,9 +67,10 @@ export async function middleware(request: NextRequest) {
     }
 
     // Auth routes
-    if ((pathname === "/login" || pathname === "/register") && user) {
+    if ((isHome || pathname === "/login" || pathname === "/register") && user) {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
+      if (isHome) url.search = "";
       const redirect = NextResponse.redirect(url);
       supabaseResponse.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
       redirect.headers.set("Cache-Control", "private, no-store");
@@ -77,6 +91,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
     "/dashboard/:path*",
     "/onboarding",
     "/login",
