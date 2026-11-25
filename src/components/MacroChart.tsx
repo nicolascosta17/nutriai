@@ -169,17 +169,17 @@ export default function MacroChart({ data }: MacroChartProps) {
             </defs>
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="#f1f5f9"
+              stroke="var(--chart-grid)"
               vertical={false}
             />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 12, fill: "#94a3b8" }}
+              tick={{ fontSize: 12, fill: "var(--chart-label)" }}
               tickLine={false}
-              axisLine={{ stroke: "#e2e8f0" }}
+              axisLine={{ stroke: "var(--chart-grid)" }}
             />
             <YAxis
-              tick={{ fontSize: 12, fill: "#94a3b8" }}
+              tick={{ fontSize: 12, fill: "var(--chart-label)" }}
               tickLine={false}
               axisLine={false}
             />

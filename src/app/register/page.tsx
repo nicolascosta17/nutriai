@@ -1,5 +1,6 @@
 "use client";
 
+import ThemeToggle from "@/components/ThemeToggle";
 import NutriLogo from "@/components/NutriLogo";
 import { useState } from "react";
 import Link from "next/link";
@@ -186,6 +187,7 @@ export default function RegisterPage() {
           </form>
 
           <GoogleSignIn disabled={isLoading || !authConfigured} />
+          <div className="mt-4 flex justify-center"><ThemeToggle /></div>
 
           <div className="mt-6 pt-6 border-t border-zinc-100 text-center">
             <p className="text-xs text-zinc-500">
