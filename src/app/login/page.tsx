@@ -67,7 +67,7 @@ export default function LoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 sm:px-10 rounded-xl border border-zinc-200/90 shadow-xs">
           <AuthCallbackNotice />
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form method="post" action="/api/auth/login" onSubmit={handleLogin} className="space-y-4">
             {loginError && (
               <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{loginError}</p>
             )}
@@ -77,7 +77,7 @@ export default function LoginPage() {
               </div>
             )}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">
+              <label htmlFor="auth-email" className="block text-xs font-semibold uppercase tracking-wider text-zinc-600 mb-1.5">
                 E-mail
               </label>
               <div className="relative">
@@ -85,6 +85,7 @@ export default function LoginPage() {
                   <Mail className="h-4 w-4" />
                 </div>
                 <input
+                  id="auth-email"
                   type="email"
                   autoComplete="email"
                   name="email"
