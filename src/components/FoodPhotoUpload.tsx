@@ -113,7 +113,6 @@ export default function FoodPhotoUpload({ onAnalysisComplete }: FoodPhotoUploadP
     try {
       const formData = new FormData();
       formData.append("image", file);
-      formData.append("photo", file);
       formData.append("meal_type", selectedMeal);
 
       const response = await fetch("/api/analyze-food", {
@@ -129,8 +128,12 @@ export default function FoodPhotoUpload({ onAnalysisComplete }: FoodPhotoUploadP
       const resData = await response.json();
       const parsedAnalysis: AnalysisResult = resData.analysis || resData;
       setResult(parsedAnalysis);
-      toast.success("Alimento decomposto e registrado com precisão.");
-      onAnalysisComplete?.(parsedAnalysis);
+      if (resData.entry) {
+        toast.success("Refeição analisada e registrada.");
+        onAnalysisComplete?.(parsedAnalysis);
+      } else {
+        toast.error("A análise foi concluída, mas a refeição não pôde ser registrada.");
+      }
     } catch (error) {
       toast.error(
         error instanceof Error

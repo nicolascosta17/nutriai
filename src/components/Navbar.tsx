@@ -3,7 +3,7 @@
 import NutriLogo from "@/components/NutriLogo";
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { 
   Menu, 
   X, 
@@ -42,7 +42,6 @@ interface NavbarProps {
 export default function Navbar({ userEmail, userName }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
   const supabase = createClient();
 
   const isActive = (href: string) => {
@@ -51,13 +50,13 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
   };
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      const { error } = await supabase.auth.signOut({ scope: "local" });
+      if (error) throw error;
+      window.location.replace("/login");
+    } catch {
       toast.error("Não foi possível encerrar a sessão.");
-      return;
     }
-    toast.success("Sessão finalizada com sucesso.");
-    router.push("/login");
   };
 
   return (
@@ -148,7 +147,7 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
 
       {/* Mobile Drawer */}
       {mobileOpen && (
-        <div id="mobile-navigation" className="lg:hidden border-t border-zinc-200 bg-white px-4 pt-3 pb-5 space-y-2 shadow-lg">
+        <div id="mobile-navigation" className="xl:hidden max-h-[calc(100dvh-4rem-var(--app-top-inset))] overflow-y-auto border-t border-zinc-200 bg-white px-4 pt-3 pb-5 space-y-2 shadow-lg">
           <div className="px-3 py-2 border-b border-zinc-100 mb-2">
             <p className="text-xs font-semibold text-zinc-900">{userName || "Paciente Ativo"}</p>
             <p className="text-[11px] text-zinc-500">{userEmail}</p>

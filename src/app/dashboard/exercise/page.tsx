@@ -196,7 +196,14 @@ export default function ExercisePage() {
       },
       exercises: []
     });
-    setIsLoading(false);
+    fetch("/api/generate-workout")
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Falha ao carregar o treino.");
+        const { plan: savedPlan } = await res.json();
+        if (savedPlan) setPlan(savedPlan);
+      })
+      .catch(() => toast.error("Não foi possível carregar seu treino salvo."))
+      .finally(() => setIsLoading(false));
   }, []);
 
   const handleToggleComplete = (name: string) => {
@@ -214,12 +221,11 @@ export default function ExercisePage() {
         throw new Error(err?.error || "Falha na geração do treino.");
       }
       const data = await res.json();
-      if (data.plan) {
-        setPlan(data.plan);
-      }
+      if (!data.plan) throw new Error("O servidor não retornou o plano de treino.");
+      setPlan(data.plan);
       toast.success("Periodização de treino gerada e adaptada com sucesso!");
-    } catch {
-      toast.info("Tabela de treino recalibrada com base nos seus equipamentos.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível gerar o plano de treino.");
     } finally {
       setIsGenerating(false);
     }

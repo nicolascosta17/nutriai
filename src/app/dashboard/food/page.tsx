@@ -32,10 +32,9 @@ export default function FoodPage() {
     setIsLoading(true);
     try {
       const res = await fetch(`/api/food-entries?date=${selectedDate}&range=day`);
-      if (res.ok) {
-        const data = await res.json();
-        setEntries(data.entries || []);
-      }
+      if (!res.ok) throw new Error("Não foi possível carregar o diário.");
+      const data = await res.json();
+      setEntries(data.entries || []);
     } catch {
       toast.error("Erro ao carregar diário alimentar.");
     } finally {
@@ -48,8 +47,17 @@ export default function FoodPage() {
   }, [selectedDate]);
 
   const handleDelete = async (id: string) => {
-    setEntries((prev) => prev.filter((item) => item.id !== id));
-    toast.success("Registro de refeição removido.");
+    try {
+      const res = await fetch(`/api/food-entries?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      if (!res.ok) {
+        const result = await res.json().catch(() => null);
+        throw new Error(result?.error || "Não foi possível remover a refeição.");
+      }
+      setEntries((prev) => prev.filter((item) => item.id !== id));
+      toast.success("Registro de refeição removido.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível remover a refeição.");
+    }
   };
 
   // Group by meal type

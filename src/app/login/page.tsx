@@ -5,22 +5,21 @@ import { useState } from "react";
 import Link from "next/link";
 import AuthCallbackNotice from "@/components/AuthCallbackNotice";
 import GoogleSignIn from "@/components/GoogleSignIn";
-import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, Loader2 } from "lucide-react";
 import { createClient, getAuthErrorMessage, isSupabaseConfigured } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const supabase = createClient();
   const authConfigured = isSupabaseConfigured();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const fields = new FormData(e.currentTarget);
+    const email = String(fields.get("email") ?? "").trim();
+    const password = String(fields.get("password") ?? "");
     if (!email || !password) {
       toast.error("Preencha seu e-mail e senha.");
       return;
@@ -43,18 +42,20 @@ export default function LoginPage() {
         return;
       }
 
-      if (!data.user) {
+      if (!data.user || !data.session) {
         toast.error("Não foi possível iniciar a sessão. Tente novamente.");
         return;
       }
 
       toast.success("Acesso autenticado com sucesso!");
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("daily_calorie_target")
         .eq("id", data.user.id)
         .maybeSingle();
-      router.replace(profile?.daily_calorie_target ? "/dashboard" : "/onboarding");
+      const requested = new URLSearchParams(window.location.search).get("redirect");
+      const dashboardPath = requested && /^\/dashboard(?:\/[a-z0-9-]+)*$/i.test(requested) ? requested : "/dashboard";
+      window.location.replace(profileError || profile?.daily_calorie_target ? dashboardPath : "/onboarding");
     } catch (error) {
       toast.error(getAuthErrorMessage(error, "login"));
     } finally {
@@ -82,7 +83,7 @@ export default function LoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 sm:px-10 rounded-xl border border-zinc-200/90 shadow-xs">
           <AuthCallbackNotice />
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form method="post" onSubmit={handleLogin} className="space-y-4">
             {!authConfigured && (
               <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-left text-sm text-amber-900">
                 Login indisponível: o serviço de contas ainda não foi configurado neste site.
@@ -99,8 +100,9 @@ export default function LoginPage() {
                 <input
                   type="email"
                   autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  name="email"
+                  autoCapitalize="none"
+                  spellCheck={false}
                   placeholder="seu.email@exemplo.com"
                   required
                   className="block w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-950 focus:border-zinc-950 transition-colors"
@@ -122,8 +124,9 @@ export default function LoginPage() {
                   id="auth-password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  name="password"
+                  autoCapitalize="none"
+                  spellCheck={false}
                   placeholder="••••••••"
                   required
                   className="block w-full pl-9 pr-12 py-2.5 text-sm rounded-lg border border-zinc-300 focus:outline-none focus:ring-1 focus:ring-zinc-950 focus:border-zinc-950 transition-colors"
