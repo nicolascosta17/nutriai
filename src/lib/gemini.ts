@@ -1,5 +1,6 @@
 "use server";
 
+import { exerciseKey, workoutOptions } from "@/lib/workout-preferences";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type {
   FoodAnalysisResult,
@@ -184,6 +185,36 @@ export async function generateExercisePlan(
   const model = getModel();
 
   const eq = profile.available_equipment?.join(", ") || "academia, corrida, caminhada";
+
+  // Explicit preferences use known exercises tied to the available equipment.
+  if (profile.excluded_exercises != null) {
+    const excludes = profile.excluded_exercises.map(exerciseKey).filter(Boolean);
+    const exercises = workoutOptions.filter(({ id, exercise }) =>
+      profile.available_equipment?.includes(id) &&
+      !excludes.some((name) => exerciseKey(exercise).includes(name) || name.includes(exerciseKey(exercise)))
+    );
+
+    const days = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+    const schedule: ExercisePlanResult["schedule"] = Object.fromEntries(days.map((day, index) => {
+      const slot = [0, 2, 4, 5].indexOf(index);
+      const option = slot >= 0 && exercises.length ? exercises[slot % exercises.length] : null;
+      return [day, option ? [{
+        name: option.exercise,
+        sets: 1,
+        reps: "Conforme seu conforto",
+        duration: null,
+        instructions: "Comece devagar. Se sentir dor, interrompa e procure orientação profissional.",
+      }] : []];
+    }));
+    return {
+      plan_name: "Treino com suas preferências",
+      goal: profile.goal ?? "health",
+      difficulty: "beginner",
+      notes: "Sugestões com base nas modalidades e nos equipamentos selecionados.",
+      schedule,
+      exercises: [],
+    };
+  }
 
   if (!model) {
     return {
