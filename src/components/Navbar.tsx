@@ -1,10 +1,10 @@
 "use client";
 
+import NutriLogo from "@/components/NutriLogo";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { 
-  Activity, 
   Menu, 
   X, 
   LogOut, 
@@ -70,9 +70,7 @@ export default function Navbar({ userEmail, userName }: NavbarProps) {
             className="flex items-center gap-2.5 transition-opacity hover:opacity-90 focus:outline-none"
             aria-label="NutriAI - Plataforma Nutricional"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-900 text-emerald-400 shadow-sm">
-              <Activity className="h-5 w-5" strokeWidth={2.2} />
-            </div>
+            <NutriLogo className="h-9 w-9" />
             <div className="flex flex-col">
               <span className="text-base font-semibold tracking-tight text-zinc-950 font-sans">
                 Nutri<span className="text-emerald-600">AI</span>
