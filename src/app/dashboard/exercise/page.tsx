@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import TrainingQuestionnaire from "@/components/TrainingQuestionnaire";
+import type { TrainingAnswers } from "@/lib/training-assessment";
 import { exerciseDemonstration } from "@/lib/exercise-checklist";
 import { Fragment, useEffect, useState } from "react";
 import { 
@@ -30,6 +32,9 @@ const DAYS = [
 ];
 
 export default function ExercisePage() {
+  const [assessment, setAssessment] = useState<TrainingAnswers | null>(null);
+  const [isEditingAssessment, setIsEditingAssessment] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [plan, setPlan] = useState<ExercisePlan | null>(null);
   const [selectedDay, setSelectedDay] = useState("Segunda");
   const [isLoading, setIsLoading] = useState(true);
@@ -40,10 +45,14 @@ export default function ExercisePage() {
     fetch("/api/generate-workout")
       .then(async (res) => {
         if (!res.ok) throw new Error("Falha ao carregar o treino.");
-        const { plan: savedPlan } = await res.json();
-        if (savedPlan) setPlan(savedPlan);
+        const { plan: savedPlan, assessment: savedAssessment } = await res.json();
+        setAssessment(savedAssessment ?? null);
+        if (savedPlan) {
+          setPlan(savedPlan);
+          if (savedAssessment?.days?.[0]) setSelectedDay(savedAssessment.days[0]);
+        }
       })
-      .catch(() => toast.error("Não foi possível carregar seu treino salvo."))
+      .catch(() => setLoadFailed(true))
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -72,6 +81,22 @@ export default function ExercisePage() {
     }
   };
 
+  async function saveAssessment(answers: TrainingAnswers) {
+    const res = await fetch("/api/generate-workout/assessment", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(answers),
+    });
+    const result = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(result?.error || "Não foi possível salvar as respostas.");
+    setAssessment(answers);
+    setSelectedDay(answers.days[0]);
+    setPlan(null);
+    setCompletedExercises([]);
+    setIsEditingAssessment(false);
+    await handleGenerateWorkout();
+  }
+
   const currentDayExercises: ExerciseDetail[] = plan?.schedule?.[selectedDay] || [];
   const rowKey = (index: number) => `${plan?.id ?? "none"}:${selectedDay}:${index}`;
   const completedToday = currentDayExercises.filter((_, index) => completedExercises.includes(rowKey(index))).length;
@@ -83,6 +108,18 @@ export default function ExercisePage() {
         <LoadingSpinner size="lg" text="Carregando tabela de treino..." />
       </div>
     );
+  }
+
+  if (loadFailed) {
+    return <div className="space-y-4">
+      <p role="alert">Não foi possível carregar seus treinos agora.</p>
+      <button type="button" onClick={() => window.location.reload()} className="min-h-11 rounded-lg border border-zinc-300 px-4">Tentar novamente</button>
+    </div>;
+  }
+
+  if (!assessment || isEditingAssessment) {
+    return <TrainingQuestionnaire initial={assessment} onSave={saveAssessment}
+      onCancel={assessment ? () => setIsEditingAssessment(false) : undefined} />;
   }
 
   return (
@@ -98,6 +135,8 @@ export default function ExercisePage() {
           </p>
         </div>
 
+        <div className="flex flex-wrap gap-2">
+          <button type="button" disabled={isGenerating} onClick={() => setIsEditingAssessment(true)} className="min-h-11 rounded-lg border border-zinc-300 px-4 text-xs font-semibold">Refazer questionário</button>
         <button
           onClick={handleGenerateWorkout}
           disabled={isGenerating}
@@ -115,6 +154,7 @@ export default function ExercisePage() {
             </>
           )}
         </button>
+        </div>
       </div>
 
       {/* Plan Info Card */}
@@ -183,7 +223,7 @@ export default function ExercisePage() {
 
         {currentDayExercises.length === 0 ? (
           <div className="p-8 text-center bg-white rounded-xl border border-zinc-200 text-zinc-500 text-xs">
-            {plan ? "Nenhum exercício programado para este dia." : "Salve suas preferências e toque em Adaptar treino para montar seu checklist."}
+            {plan ? "Nenhum exercício programado para este dia." : "Toque em Adaptar treino para montar seu checklist com as respostas salvas."}
             {!currentDayExercises.length && (
               <Link href="/dashboard/account" className="mt-2 block font-semibold text-emerald-700 underline">Ver preferências de treino</Link>
             )}
