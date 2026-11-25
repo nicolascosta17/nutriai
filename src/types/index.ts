@@ -88,6 +88,7 @@ export interface ExerciseSchedule {
 
 export interface ExerciseDetail {
   name: string;
+  group?: string;
   sets: number;
   reps: string;
   duration: string | null;
