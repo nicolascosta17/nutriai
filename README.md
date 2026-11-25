@@ -72,3 +72,11 @@ O arquivo de migração completo encontra-se em:
 supabase/migrations/001_initial_schema.sql
 ```
 Basta executar o script no SQL Editor do painel Supabase para criar as tabelas com RLS habilitado.
+
+### 4. Autenticação em produção
+
+Use um projeto Supabase dedicado ao NutriAI. Configure as chaves públicas acima no Netlify e aplique o esquema do banco antes de habilitar o cadastro. Em **Authentication → URL Configuration**, defina a URL do site como `https://nutriai-clinical.netlify.app` e autorize `https://nutriai-clinical.netlify.app/auth/callback` e `https://nutriai-clinical.netlify.app/auth/callback?flow=email_change`.
+
+- **E-mail e senha:** configure SMTP próprio com um remetente autorizado. Mantenha a confirmação de cadastro, a confirmação da troca de e-mail nos dois endereços e a troca de senha segura. Configure o mínimo de oito caracteres em Auth. O SMTP padrão do Supabase não envia para o público.
+- **Links de confirmação:** no template de cadastro, use `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email`. No template de troca de e-mail, use `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email_change`. Essa configuração permite que o link de e-mail funcione também em um navegador diferente do usado para solicitá-lo.
+- **Google:** em Google Cloud, crie um cliente OAuth do tipo **Aplicativo da Web** para o NutriAI. Autorize a origem do site e a URI de redirecionamento fornecida pelo painel do Supabase, no formato `https://<project-ref>.supabase.co/auth/v1/callback`. Em Supabase **Authentication → Sign In / Providers → Google**, configure o Client ID e o Client Secret. Após habilitar o provedor, defina `NEXT_PUBLIC_GOOGLE_SIGN_IN=true` no Netlify e publique novamente. Guarde o Client Secret no Supabase.
