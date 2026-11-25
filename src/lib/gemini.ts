@@ -1,6 +1,6 @@
 "use server";
 
-import { exerciseKey, workoutOptions } from "@/lib/workout-preferences";
+import { buildExerciseSchedule } from "@/lib/exercise-checklist";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type {
   FoodAnalysisResult,
@@ -179,100 +179,13 @@ Gere uma prescrição dietética completa em formato JSON válido:
 // 3. Generate Exercise Plan
 // ---------------------------------------------------------------------------
 
-export async function generateExercisePlan(
-  profile: Profile
-): Promise<ExercisePlanResult> {
-  const model = getModel();
-
-  const eq = profile.available_equipment?.join(", ") || "academia, corrida, caminhada";
-
-  // Explicit preferences use known exercises tied to the available equipment.
-  if (profile.excluded_exercises != null) {
-    const excludes = profile.excluded_exercises.map(exerciseKey).filter(Boolean);
-    const exercises = workoutOptions.filter(({ id, exercise }) =>
-      profile.available_equipment?.includes(id) &&
-      !excludes.some((name) => exerciseKey(exercise).includes(name) || name.includes(exerciseKey(exercise)))
-    );
-
-    const days = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
-    const schedule: ExercisePlanResult["schedule"] = Object.fromEntries(days.map((day, index) => {
-      const slot = [0, 2, 4, 5].indexOf(index);
-      const option = slot >= 0 && exercises.length ? exercises[slot % exercises.length] : null;
-      return [day, option ? [{
-        name: option.exercise,
-        sets: 1,
-        reps: "Conforme seu conforto",
-        duration: null,
-        instructions: "Comece devagar. Se sentir dor, interrompa e procure orientação profissional.",
-      }] : []];
-    }));
-    return {
-      plan_name: "Treino com suas preferências",
-      goal: profile.goal ?? "health",
-      difficulty: "beginner",
-      notes: "Sugestões com base nas modalidades e nos equipamentos selecionados.",
-      schedule,
-      exercises: [],
-    };
-  }
-
-  if (!model) {
-    return {
-      plan_name: `Periodização Adaptada (${profile.goal === "lose_weight" ? "Definição & Gasto Metabólico" : "Força & Hipertrofia"})`,
-      goal: profile.goal || "lose_weight",
-      difficulty: "intermediate",
-      notes: "Periodização intercalando estímulos de força resistida e condicionamento oxidativo aeróbico.",
-      schedule: {
-        Segunda: [
-          { name: "Musculação: Membros Superiores (Peito, Costas, Ombros)", sets: 4, reps: "10-12 reps", duration: "45 min", instructions: "Foco em contração controlada e progressão de carga." },
-          { name: "Corrida Intervalada (HIIT na esteira ou rua)", sets: 1, reps: "10 tiros de 1 min", duration: "20 min", instructions: "Elevação de frequência cardíaca para otimizar déficit." }
-        ],
-        Terça: [
-          { name: "Musculação: Membros Inferiores (Quadríceps, Isquiotibiais)", sets: 4, reps: "8-10 reps", duration: "45 min", instructions: "Agachamentos e exercícios compostos multiarticulares." },
-          { name: "Caminhada Inclinada ou Ciclismo LISS", sets: 1, reps: "Ritmo constante", duration: "25 min", instructions: "Zona 2 cardíaca para queima de gordura." }
-        ],
-        Quarta: [
-          { name: "Recuperação Ativa & Mobilidade", sets: 1, reps: "Série contínua", duration: "30 min", instructions: "Caminhada leve ao ar livre e alongamentos miofasciais." }
-        ],
-        Quinta: [
-          { name: "Musculação: Costas, Posterior de Ombro e Bíceps", sets: 4, reps: "10-12 reps", duration: "45 min", instructions: "Puxadas, remadas curvadas e estabilização de core." },
-          { name: "Ciclismo ou Bike Intervalada", sets: 1, reps: "Tiros moderados", duration: "20 min", instructions: "Gasto calórico complementar." }
-        ],
-        Sexta: [
-          { name: "Musculação: Glúteos, Peito e Tríceps", sets: 3, reps: "12-15 reps", duration: "40 min", instructions: "Estímulo de densidade muscular." },
-          { name: "Corrida Contínua em Ritmo Moderado", sets: 1, reps: "5 km", duration: "30 min", instructions: "Resistência cardiovascular." }
-        ],
-        Sábado: [
-          { name: "Atividade Aeróbica ao Ar Livre (Pedalar, Correr ou Caminhar)", sets: 1, reps: "Livre", duration: "45 min", instructions: "Manter taxa metabólica ativa." }
-        ],
-        Domingo: [
-          { name: "Descanso Pleno e Regeneração", sets: 0, reps: "Repouso", duration: "Dia Livre", instructions: "Sono reparador e hidratação." }
-        ]
-      },
-      exercises: []
-    };
-  }
-
-  const prompt = `Você é um preparador físico e especialista em periodização de treinos intercalados.
-O usuário possui acesso aos seguintes recursos e equipamentos: ${eq}.
-Objetivo: ${profile.goal}
-Peso: ${profile.weight_kg}kg, Altura: ${profile.height_cm}cm.
-
-Gere uma periodização semanal completa (Segunda a Domingo) em JSON:
-{
-  "plan_name": "Nome técnico da periodização",
-  "difficulty": "intermediate",
-  "schedule": {
-    "Segunda": [{"name": "Exercício", "sets": 4, "reps": "10-12", "duration": "30 min", "instructions": "Técnica"}],
-    "Terça": [...],
-    "Quarta": [...],
-    "Quinta": [...],
-    "Sexta": [...],
-    "Sábado": [...],
-    "Domingo": [...]
-  }
-}`;
-
-  const result = await model.generateContent(prompt);
-  return extractJSON<ExercisePlanResult>(result.response.text());
+export async function generateExercisePlan(profile: Profile): Promise<ExercisePlanResult> {
+  return {
+    plan_name: "Treino com suas preferências",
+    goal: profile.goal ?? "health",
+    difficulty: "beginner",
+    notes: "Exercícios individuais conforme os equipamentos e modalidades disponíveis.",
+    schedule: buildExerciseSchedule(profile),
+    exercises: [],
+  };
 }

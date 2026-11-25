@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { expandSavedStrengthBlocks } from "@/lib/exercise-checklist";
 import { generateExercisePlan } from "@/lib/gemini";
 import type { Profile } from "@/types";
 
@@ -94,7 +95,14 @@ export async function GET() {
       .select("*").eq("user_id", user.id).eq("is_active", true)
       .order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (error) throw error;
-    return NextResponse.json({ plan });
+    if (!plan) return NextResponse.json({ plan: null });
+    const { data: preferences, error: preferenceError } = await supabase.from("profiles")
+      .select("available_equipment, excluded_exercises").eq("id", user.id).maybeSingle();
+    if (preferenceError) throw preferenceError;
+    return NextResponse.json({ plan: {
+      ...plan,
+      schedule: expandSavedStrengthBlocks(plan.schedule, preferences ?? { available_equipment: [], excluded_exercises: [] }),
+    } });
   } catch {
     return NextResponse.json({ error: "Não foi possível carregar o plano de treino." }, { status: 500 });
   }
