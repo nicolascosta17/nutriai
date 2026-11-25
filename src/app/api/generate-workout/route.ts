@@ -38,13 +38,6 @@ export async function POST() {
     // Generate exercise plan with Gemini based on available equipment & goal
     const exercisePlan = await generateExercisePlan(profile as Profile);
 
-    // Deactivate previous exercise plans
-    await supabase
-      .from("exercise_plans")
-      .update({ is_active: false })
-      .eq("user_id", user.id)
-      .eq("is_active", true);
-
     // Insert new plan
     const { data: savedPlan, error: insertError } = await supabase
       .from("exercise_plans")
@@ -67,6 +60,14 @@ export async function POST() {
         { status: 500 }
       );
     }
+
+    const { error: cleanupError } = await supabase
+      .from("exercise_plans")
+      .update({ is_active: false })
+      .eq("user_id", user.id)
+      .eq("is_active", true)
+      .lt("created_at", savedPlan.created_at);
+    if (cleanupError) console.warn("Não foi possível desativar planos anteriores.", cleanupError.code);
 
     return NextResponse.json({
       message: "Periodização de treino gerada com sucesso.",
