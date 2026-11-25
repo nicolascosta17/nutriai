@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 html {
+  --app-top-inset: env(safe-area-inset-top, 0px);
   scroll-behavior: smooth;
 }
 
@@ -91,6 +92,7 @@ body {
 body {
   min-height: 100vh;
   min-height: 100dvh;
+  padding-top: var(--app-top-inset);
 }
 
 @media (max-width: 767px) {
@@ -112,8 +114,11 @@ body {
   padding-right: max(1rem, env(safe-area-inset-right));
 }
 
-@media (display-mode: standalone) {
-  .app-safe-area-top {
-    padding-top: env(safe-area-inset-top);
-  }
+.app-safe-area-top {
+  top: var(--app-top-inset);
+}
+
+/* Keep fixed toasts below the status bar in Safari and when installed. */
+html body [data-sonner-toaster][data-y-position="top"] {
+  top: calc(var(--offset-top, 16px) + var(--app-top-inset));
 }
