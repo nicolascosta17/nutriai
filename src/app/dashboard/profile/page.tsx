@@ -35,18 +35,20 @@ export default function ProfilePage() {
 
   // Weight Logging
   const [newWeight, setNewWeight] = useState("");
+  const [isLogging, setIsLogging] = useState(false);
   const [weightHistory, setWeightHistory] = useState<WeightLog[]>([]);
 
   useEffect(() => {
     async function loadProfile() {
       try {
         const res = await fetch("/api/profile");
-        if (res.ok) {
+        if (!res.ok) throw new Error("Não foi possível carregar seu perfil.");
+        {
           const data = await res.json();
           if (data.profile) {
             const p = data.profile;
             setProfile(p);
-            setName(p.name || "Paciente Nicolas");
+            setName(p.name ?? "");
             setWeightKg(p.weight_kg || 78);
             setHeightCm(p.height_cm || 175);
             setAge(p.age || 29);
@@ -57,16 +59,11 @@ export default function ProfilePage() {
           }
         }
 
-        // Mock initial weight progression curve
-        setWeightHistory([
-          { id: "1", user_id: "u1", weight_kg: 82.5, logged_at: "2024-11-01" },
-          { id: "2", user_id: "u1", weight_kg: 81.2, logged_at: "2024-11-08" },
-          { id: "3", user_id: "u1", weight_kg: 80.0, logged_at: "2024-11-15" },
-          { id: "4", user_id: "u1", weight_kg: 79.1, logged_at: "2024-11-20" },
-          { id: "5", user_id: "u1", weight_kg: 78.0, logged_at: "2024-11-24" },
-        ]);
-      } catch {
-        toast.error("Erro ao carregar prontuário.");
+        const history = await fetch("/api/weight-history");
+        if (!history.ok) throw new Error("Não foi possível carregar seu histórico de peso.");
+        setWeightHistory((await history.json()).history);
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Erro ao carregar prontuário.");
       } finally {
         setIsLoading(false);
       }
@@ -105,35 +102,44 @@ export default function ProfilePage() {
         }),
       });
 
-      if (res.ok) {
-        toast.success("Parâmetros metabólicos atualizados.");
-      } else {
-        toast.info("Perfil sincronizado localmente.");
+      if (!res.ok) {
+        const result = await res.json().catch(() => null);
+        throw new Error(result?.error || "Não foi possível salvar o perfil.");
       }
-    } catch {
-      toast.info("Perfil sincronizado localmente.");
+      toast.success("Parâmetros metabólicos atualizados.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível salvar o perfil.");
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleLogWeight = (e: React.FormEvent) => {
+  const handleLogWeight = async (e: React.FormEvent) => {
     e.preventDefault();
-    const w = parseFloat(newWeight);
-    if (!w || isNaN(w)) return;
-
-    setWeightKg(w);
-    setWeightHistory((prev) => [
-      ...prev,
-      {
-        id: String(Date.now()),
-        user_id: "u1",
-        weight_kg: w,
-        logged_at: new Date().toISOString().split("T")[0],
-      },
-    ]);
-    setNewWeight("");
-    toast.success(`Peso de ${w} kg registrado na curva de tendência.`);
+    if (isLogging) return;
+    const weight = Number(newWeight.replace(",", "."));
+    if (!Number.isFinite(weight) || weight <= 0) {
+      toast.error("Informe um peso válido.");
+      return;
+    }
+    setIsLogging(true);
+    try {
+      const res = await fetch("/api/weight-history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ weight_kg: weight }),
+      });
+      const result = await res.json().catch(() => null);
+      if (!res.ok || !result?.log) throw new Error(result?.error || "Não foi possível registrar seu peso.");
+      setWeightKg(weight);
+      setWeightHistory((previous) => [...previous.slice(-99), result.log]);
+      setNewWeight("");
+      toast.success("Peso registrado no histórico.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível registrar seu peso.");
+    } finally {
+      setIsLogging(false);
+    }
   };
 
   if (isLoading) {
@@ -335,6 +341,7 @@ export default function ProfilePage() {
               />
               <button
                 type="submit"
+                  disabled={isLogging}
                 className="px-4 py-2 rounded-lg bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-semibold"
               >
                 Registrar
