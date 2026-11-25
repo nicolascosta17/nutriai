@@ -20,8 +20,8 @@ export async function PUT(request: NextRequest) {
   }
 
   const { error } = await supabase.from("profiles").update({
-    available_equipment: [...new Set(equipment)],
-    excluded_exercises: [...new Set(excluded.map((item: string) => item.trim()).filter(Boolean))],
+    available_equipment: Array.from(new Set(equipment)),
+    excluded_exercises: Array.from(new Set(excluded.map((item: string) => item.trim()).filter(Boolean))),
   }).eq("id", user.id).select("id").single();
 
   if (error) return NextResponse.json({ error: "Não foi possível salvar as preferências." }, { status: 500 });
